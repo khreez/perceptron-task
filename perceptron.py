@@ -1,3 +1,6 @@
+from csv import reader
+from random import sample
+
 # inputs assumes a bias added with a value of 1 as the last elemnt of the array
 def activation(inputs, weights):
   activated = 0.0
@@ -37,30 +40,69 @@ def train_weights(train_set, learning_rate):
     print('>attempt=%d, lrate=%.3f, error=%.3f' % (attempt, learning_rate, sum_error))
   return weights
 
-data_set = [
-  [2.7810836,2.550537003,0],
-  [1.465489372,2.362125076,0],
-  [3.396561688,4.400293529,0],
-  [1.38807019,1.850220317,0],
-  [3.06407232,3.005305973,0],
-  [7.627531214,2.759262235,1],
-  [5.332441248,2.088626775,1],
-  [6.922596716,1.77106367,1],
-  [8.675418651,-0.242068655,1],
-  [7.673756466,3.508563011,1]
-]
+def select_train_set(data_set):
+  sample_size = int(len(data_set) * 0.6)
+  # print("size: %d, sample: %d" % (len(data_set), sample_size))
+  # shuffling data
+  shuffled_set = sample(data_set, len(data_set))
+  # new array to accomodate bias from a 60% data_set trainig sample
+  train_set = [[row[0], row[1], 1, row[2]] for row in shuffled_set[:sample_size]]
+  return train_set
 
-# new array to accomodate bias from a 60% data_set trainig sample
-train_set = [[row[0], row[1], 1, row[2]] for row in data_set[:6]]
-learning_rate = 0.1
+def perceptron(data_set, learning_rate):
+  # get a training set
+  train_set = select_train_set(data_set)
+  # first train the weights
+  weights = train_weights(train_set, learning_rate)
+  # print(weights)
+  predictions = list()
+  for row in data_set:
+    # adding bias to the input
+    inputs = [row[0], row[1], 1]
+    # execution
+    predicted = prediction(inputs, weights)
+    predictions.append(predicted)
+    print("Expected=%d, Predicted=%d" % (row[-1], predicted))
+  return predictions
 
-# first train the weights
-weights = train_weights(train_set, learning_rate)
-print(weights)
+#===== BEGIN | utility functions
 
+# Convert string column to integer
+def str_column_to_int(values, column):
+  class_values = [row[column] for row in values]
+  unique = set(class_values)
+  lookup = dict()
+  for i, value in enumerate(unique):
+    lookup[value] = i
+  for row in values:
+    row[column] = lookup[row[column]]
+  return lookup
+
+# Load a CSV file
+def load_csv(file_name):
+  inputs = list()
+  with open(file_name, 'r') as file:
+    csv_reader = reader(file)
+    for row in csv_reader:
+      if not row:
+        continue
+      # print(row)
+      inputs.append([float(row[0].strip()), float(row[1].strip()), row[-1]])
+  return inputs
+
+# Load a CSV file and transform it to a dataset
+def load_data_set(file_name):
+  data_set = load_csv(file_name)
+  str_column_to_int(data_set, len(data_set[0])-1)
+  return data_set
+
+#===== END | utility functions
+
+data_set = load_data_set('iris.data')
+# merge unwanted class values for iris.data
 for row in data_set:
-  # adding bias to the input
-  inputs = [row[0], row[1], 1]
-  # execution
-  predicted = prediction(inputs, weights)
-  print("Expected=%d, Predicted=%d" % (row[-1], predicted))
+  row[-1] = 1 if row[-1] == 2 else 0
+  # print(row)
+
+learning_rate = 0.5
+perceptron(data_set, learning_rate)
