@@ -15,8 +15,7 @@ def prediction(inputs, weights):
 # as the last two elements of each input row
 def train_weights(train_set, learning_rate):  
   # weights initialization, could be a random from -0.5 to 0.5 skipping 0
-  # weights = [0.0 for i in range(len(train_set[0]) - 1)]
-  weights = [0.5, -0.1, .02]
+  weights = [0.0 for i in range(len(train_set[0]) - 1)]
   for row in train_set:
     # discard the expected output value (last array item)
     inputs = row[:-1]
