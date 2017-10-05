@@ -43,7 +43,7 @@ def train_weights(train_set, learning_rate):
 def select_train_set(data_set):
   sample_size = int(len(data_set) * 0.6)
   # print("size: %d, sample: %d" % (len(data_set), sample_size))
-  # shuffling data
+  # shuffling data so we have a uniform trainig set
   shuffled_set = sample(data_set, len(data_set))
   # new array to accomodate bias from a 60% data_set trainig sample
   train_set = [[row[0], row[1], 1, row[2]] for row in shuffled_set[:sample_size]]
