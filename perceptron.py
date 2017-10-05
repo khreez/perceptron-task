@@ -16,15 +16,25 @@ def prediction(inputs, weights):
 def train_weights(train_set, learning_rate):  
   # weights initialization, could be a random from -0.5 to 0.5 skipping 0
   weights = [0.0 for i in range(len(train_set[0]) - 1)]
-  for row in train_set:
-    # discard the expected output value (last array item)
-    inputs = row[:-1]
-    predicted = prediction(inputs, weights)
-    error = row[-1] - predicted
-    # do we need to train wheights until prediction matches all expected classes?
-    for i in range(len(weights)):
-      # stochastic gradient descent weigth adjustment
-      weights[i] = weights[i] + learning_rate * error * inputs[i]
+  attempt = 0
+  is_trained = False
+  while is_trained is False:
+    attempt += 1
+    sum_error = 0.0
+    is_matching = True
+    for row in train_set:
+      # discard the expected output value (last array item)
+      inputs = row[:-1]
+      predicted = prediction(inputs, weights)
+      error = row[-1] - predicted
+      # do we need to train wheights until prediction matches all expected classes?
+      is_matching = is_matching and bool(error == 0)
+      sum_error += error**2
+      for i in range(len(weights)):
+        # stochastic gradient descent weigth adjustment
+        weights[i] = weights[i] + learning_rate * error * inputs[i]
+    is_trained = is_matching
+    print('>attempt=%d, lrate=%.3f, error=%.3f' % (attempt, learning_rate, sum_error))
   return weights
 
 data_set = [
@@ -42,7 +52,7 @@ data_set = [
 
 # new array to accomodate bias from a 60% data_set trainig sample
 train_set = [[row[0], row[1], 1, row[2]] for row in data_set[:6]]
-learning_rate = 0.9
+learning_rate = 0.1
 
 # first train the weights
 weights = train_weights(train_set, learning_rate)
